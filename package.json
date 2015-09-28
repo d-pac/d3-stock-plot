@@ -20,5 +20,11 @@
   "bugs": {
     "url": "https://github.com/d-pac/d3-stock-plot/issues"
   },
-  "homepage": "https://github.com/d-pac/d3-stock-plot"
+  "homepage": "https://github.com/d-pac/d3-stock-plot",
+  "devDependencies": {
+    "babel": "^5.8.23"
+  },
+  "dependencies": {
+    "d3": "^3.5.6"
+  }
 }
