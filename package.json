@@ -4,7 +4,7 @@
   "description": "D3 stock plot component",
   "main": "dist/d3-stock-plot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha tests/*.spec.js",
     "compile": "babel src/d3-stock-plot.js -o dist/d3-stock-plot.js"
   },
   "repository": {
@@ -23,7 +23,11 @@
   },
   "homepage": "https://github.com/d-pac/d3-stock-plot",
   "devDependencies": {
-    "babel": "^5.8.23"
+    "babel": "^5.8.23",
+    "jsdom": "^6.5.1",
+    "mocha": "^2.3.3",
+    "must": "^0.13.1",
+    "require-directory": "^2.1.1"
   },
   "dependencies": {
     "d3": "^3.5.6"
