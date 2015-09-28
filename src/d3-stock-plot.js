@@ -1,6 +1,6 @@
-import 'd3';
+import * as d3 from 'd3';
 
-export const DEFAULTS = {
+const DEFAULTS = {
     margin: {
         top: 20,
         right: 20,
@@ -57,9 +57,33 @@ class Renderer {
         return this._config.height;
     }
 
-    render( data ){
-        const [width, height] = this._calculateGraphDimensions();
-
+    data( value = undefined ){
+        if( typeof value !== 'undefined' ){
+            this._data = value;
+            return this;
+        }
+        return this._data;
+    }
+    
+    render( {el= undefined, data= undefined, margin=undefined, width=undefined, height=undefined} ){
+        (typeof width !== 'undefined' ) && this.width( width );
+        (typeof height !== 'undefined' ) && this.height( height );
+        (typeof margin !== 'undefined' ) && this.margin( margin );
+        (typeof el !== 'undefined' ) && this.el( el );
+        (typeof data !== 'undefined' ) && this.data( data );
+        
+        el = this.el();
+        if(!el){
+            throw new Error('"el" required.');
+        }
+        
+        data = this.data();
+        if(!data){
+            throw new Error('"data" required.');
+        }
+        
+        [ width, height ] = this._calculateGraphDimensions();
+        
         const n = data.length;
         const x = d3.scale.linear().range( [ 0, width ] );
         const y = d3.scale.linear().range( [ height, 0 ] );
@@ -77,7 +101,10 @@ class Renderer {
             return color( d.state );
         };
 
-        const svg = d3.select( this.el() ).append( "svg" )
+
+        const svg = d3.select( this.el() )
+            .append( "svg" )
+            .attr( 'class', 'd3-stock-plot' )
             .attr( "width", this.width() )
             .attr( "height", this.height() )
             .append( "g" )
@@ -123,6 +150,10 @@ class Renderer {
     }
 }
 
-export default function( {el= undefined, opts= DEFAULTS} ){
+function D3StockPlot( {el= undefined, opts= DEFAULTS}={} ){
     return new Renderer( el, opts );
 }
+
+D3StockPlot.DEFAULTS = DEFAULTS;
+
+export default D3StockPlot;

@@ -8,9 +8,13 @@ var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = 
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-require('d3');
+var _d3 = require('d3');
+
+var d3 = _interopRequireWildcard(_d3);
 
 var DEFAULTS = {
     margin: {
@@ -23,18 +27,12 @@ var DEFAULTS = {
     height: 500
 };
 
-exports.DEFAULTS = DEFAULTS;
-
 var Renderer = (function () {
-    function Renderer(el) {
-        var opts = arguments.length <= 1 || arguments[1] === undefined ? DEFAULTS : arguments[1];
-
+    function Renderer(el, opts) {
         _classCallCheck(this, Renderer);
 
         this.el(el);
         this._config = opts;
-        this._graphWidth = undefined;
-        this._graphHeight = undefined;
     }
 
     _createClass(Renderer, [{
@@ -87,14 +85,59 @@ var Renderer = (function () {
             return this._config.height;
         }
     }, {
+        key: 'data',
+        value: function data() {
+            var value = arguments.length <= 0 || arguments[0] === undefined ? undefined : arguments[0];
+
+            if (typeof value !== 'undefined') {
+                this._data = value;
+                return this;
+            }
+            return this._data;
+        }
+    }, {
         key: 'render',
-        value: function render(data) {
+        value: function render(_ref) {
+            var _ref$el = _ref.el;
+            var el = _ref$el === undefined ? undefined : _ref$el;
+            var _ref$data = _ref.data;
+            var data = _ref$data === undefined ? undefined : _ref$data;
+            var _ref$margin = _ref.margin;
+            var margin = _ref$margin === undefined ? undefined : _ref$margin;
+            var _ref$width = _ref.width;
+            var width = _ref$width === undefined ? undefined : _ref$width;
+            var _ref$height = _ref.height;
+            var height = _ref$height === undefined ? undefined : _ref$height;
+
+            typeof width !== 'undefined' && this.width(width);
+            typeof height !== 'undefined' && this.height(height);
+            typeof margin !== 'undefined' && this.margin(margin);
+            typeof el !== 'undefined' && this.el(el);
+            typeof data !== 'undefined' && this.data(data);
+
+            el = this.el();
+            if (!el) {
+                throw new Error('"el" required.');
+            }
+
+            data = this.data();
+            if (!data) {
+                throw new Error('"data" required.');
+            }
+
             var _calculateGraphDimensions2 = this._calculateGraphDimensions();
 
             var _calculateGraphDimensions22 = _slicedToArray(_calculateGraphDimensions2, 2);
 
-            var width = _calculateGraphDimensions22[0];
-            var height = _calculateGraphDimensions22[1];
+            width = _calculateGraphDimensions22[0];
+            height = _calculateGraphDimensions22[1];
+
+            if (typeof width === 'undefined') {
+                throw new Error('"width" required.');
+            }
+            if (typeof height === 'undefined') {
+                throw new Error('"height" required.');
+            }
 
             var n = data.length;
             var x = d3.scale.linear().range([0, width]);
@@ -109,7 +152,7 @@ var Renderer = (function () {
                 return color(d.state);
             };
 
-            var svg = d3.select(this.el()).append("svg").attr("width", this.width()).attr("height", this.height()).append("g").attr("transform", "translate(" + this.margin().left + "," + this.margin().top + ")");
+            var svg = d3.select(this.el()).append("svg").attr('class', 'd3-stock-plot').attr("width", this.width()).attr("height", this.height()).append("g").attr("transform", "translate(" + this.margin().left + "," + this.margin().top + ")");
 
             x.domain([0, n]);
 
@@ -134,11 +177,18 @@ var Renderer = (function () {
     return Renderer;
 })();
 
-exports['default'] = function (_ref) {
-    var _ref$el = _ref.el;
-    var el = _ref$el === undefined ? undefined : _ref$el;
-    var _ref$opts = _ref.opts;
-    var opts = _ref$opts === undefined ? DEFAULTS : _ref$opts;
+function D3StockPlot() {
+    var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    var _ref2$el = _ref2.el;
+    var el = _ref2$el === undefined ? undefined : _ref2$el;
+    var _ref2$opts = _ref2.opts;
+    var opts = _ref2$opts === undefined ? DEFAULTS : _ref2$opts;
 
     return new Renderer(el, opts);
-};
+}
+
+D3StockPlot.DEFAULTS = DEFAULTS;
+
+exports['default'] = D3StockPlot;
+module.exports = exports['default'];
