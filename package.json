@@ -1,0 +1,24 @@
+{
+  "name": "d3-stock-plot",
+  "version": "1.0.0",
+  "description": "D3 stock plot component",
+  "main": "dist/d3-stock-plot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d-pac/d3-stock-plot"
+  },
+  "keywords": [
+    "d3",
+    "stock",
+    "plot"
+  ],
+  "author": "d-pac",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/d-pac/d3-stock-plot/issues"
+  },
+  "homepage": "https://github.com/d-pac/d3-stock-plot"
+}
