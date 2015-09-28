@@ -4,7 +4,8 @@
   "description": "D3 stock plot component",
   "main": "dist/d3-stock-plot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "babel src/d3-stock-plot.js -o dist/d3-stock-plot.js"
   },
   "repository": {
     "type": "git",
