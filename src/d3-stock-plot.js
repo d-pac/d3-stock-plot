@@ -1,4 +1,6 @@
 import * as d3 from 'd3';
+import * as _ from 'lodash';
+import chainable from 'chainable-object';
 
 const DEFAULTS = {
     margin: {
@@ -8,83 +10,45 @@ const DEFAULTS = {
         bottom: 20
     },
     width: 960,
-    height: 500
+    height: 500,
+    el: false,
+    data: false
 };
 
+function convertToNumber( value ){
+    return Number( value );
+}
+
 class Renderer {
-    constructor( el,
-                 opts ){
-        this.el( el );
-        this._config = opts;
+    constructor( opts = {} ){
+        chainable( this, _.defaults( opts, DEFAULTS ) );
     }
 
     _calculateGraphDimensions(){
         return [
-            this.width() - this.margin().left - this.margin().right,
-            this.height() - this.margin().top - this.margin().bottom
+            this.width() - this.margin().left() - this.margin().right(),
+            this.height() - this.margin().top() - this.margin().bottom()
         ]
     }
 
-    el( value = undefined ){
-        if( typeof value !== 'undefined' ){
-            this._el = value;
-            return this;
-        }
-        return this._el;
-    }
-
-    margin( value = undefined ){
-        if( typeof value !== 'undefined' ){
-            this._config.margin = value;
-            return this;
-        }
-        return this._config.margin;
-    }
-
-    width( value = undefined ){
-        if( typeof value !== 'undefined' ){
-            this._config.width = value;
-            return this;
-        }
-        return this._config.width;
-    }
-
-    height( value = undefined ){
-        if( typeof value !== 'undefined' ){
-            this._config.height = value;
-            return this;
-        }
-        return this._config.height;
-    }
-
-    data( value = undefined ){
-        if( typeof value !== 'undefined' ){
-            this._data = value;
-            return this;
-        }
-        return this._data;
-    }
-    
     render( {el= undefined, data= undefined, margin=undefined, width=undefined, height=undefined} ){
-        (typeof width !== 'undefined' ) && this.width( width );
-        (typeof height !== 'undefined' ) && this.height( height );
-        (typeof margin !== 'undefined' ) && this.margin( margin );
-        (typeof el !== 'undefined' ) && this.el( el );
-        (typeof data !== 'undefined' ) && this.data( data );
-        
+        for( let [key, value] of Object.entries( arguments[ 0 ] ) ){
+            this[ key ]( value );
+        }
+
         el = this.el();
-        if(!el){
-            throw new Error('"el" required.');
+        if( !el ){
+            throw new Error( '"el" required.' );
         }
-        
+
         data = this.data();
-        if(!data){
-            throw new Error('"data" required.');
+        if( !data ){
+            throw new Error( '"data" required.' );
         }
-        
+
         [ width, height ] = this._calculateGraphDimensions();
-        
-        const n = data.length;
+
+        const n = _.size( data );
         const x = d3.scale.linear().range( [ 0, width ] );
         const y = d3.scale.linear().range( [ height, 0 ] );
         const color = d3.scale.category10();
@@ -101,14 +65,13 @@ class Renderer {
             return color( d.state );
         };
 
-
         const svg = d3.select( this.el() )
             .append( "svg" )
             .attr( 'class', 'd3-stock-plot' )
             .attr( "width", this.width() )
             .attr( "height", this.height() )
             .append( "g" )
-            .attr( "transform", "translate(" + this.margin().left + "," + this.margin().top + ")" );
+            .attr( "transform", "translate(" + this.margin().left() + "," + this.margin().top() + ")" );
 
         x.domain( [ 0, n ] );
 
@@ -121,11 +84,12 @@ class Renderer {
             .attr( "class", "y axis" )
             .call( yAxis );
 
-        var points = svg.selectAll( ".point" )
+        var values = svg.selectAll( "values" )
             .data( data ).enter();
 
-        points
+        values
             .append( "line" )
+            .attr('class', 'range')
             .attr( "x1", returnX )
             .attr( "x2", returnX )
             .attr( "y1", function( d ){
@@ -138,9 +102,9 @@ class Renderer {
             .style( "stroke", returnColor )
             .style( "fill", "none" );
 
-        points
+        values
             .append( "circle" )
-            .attr( "class", "dot" )
+            .attr( "class", "point" )
             .attr( "r", 3.5 )
             .attr( "cx", returnX )
             .attr( "cy", function( d ){
@@ -150,8 +114,8 @@ class Renderer {
     }
 }
 
-function D3StockPlot( {el= undefined, opts= DEFAULTS}={} ){
-    return new Renderer( el, opts );
+function D3StockPlot( opts = DEFAULTS ){
+    return new Renderer( opts );
 }
 
 D3StockPlot.DEFAULTS = DEFAULTS;

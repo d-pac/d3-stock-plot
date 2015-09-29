@@ -2,15 +2,23 @@
 
 var expect = require( 'must' );
 var jsdom = require( 'jsdom' );
+var fs = require( 'fs' );
+var path = require( 'path' );
 
+require( 'babel/polyfill' );
 var subject = require( '../dist/d3-stock-plot' );
 var fixtures = require( './fixtures' );
+var jquery = fs.readFileSync( "./node_modules/jquery/dist/jquery.js", "utf-8" );
+var html = {
+    header: '<html><head><title></title></head><body>',
+    footer: '</body></html>'
+}
 
 describe( 'D3 stock plot component', function(){
     var document, $;
     before( function( done ){
-        jsdom.env( '<html><head><title></title></head><body></body></html>',
-            [ "http://code.jquery.com/jquery.js" ],
+        jsdom.env( html.header + html.footer,
+            { src: [ jquery ] },
             function( err,
                       window ){
                 document = window.document;
@@ -43,7 +51,7 @@ describe( 'D3 stock plot component', function(){
             } );
             it( 'should create a renderer', function(){
                 expect( renderer ).to.be.an.object();
-                [ 'render', 'margin', 'width', 'height' ].forEach( function( propName ){
+                [ 'render', 'margin', 'width', 'height', 'el', 'data' ].forEach( function( propName ){
                     expect( renderer[ propName ] ).to.be.a.function();
                 } );
             } );
@@ -58,6 +66,19 @@ describe( 'D3 stock plot component', function(){
                     expect( function(){
                         renderer.render( { el: document.body } );
                     } ).to.throw( /data/ );
+                } );
+
+                it( 'should render the graph correctly', function(){
+                    renderer.render( {
+                        el: document.body,
+                        data: fixtures.data
+                    } );
+                    var $svg = $( 'svg.d3-stock-plot' );
+                    expect( Number( $svg.attr( 'width' ) ) ).to.equal( subject.DEFAULTS.width );
+                    expect( Number( $svg.attr( 'height' ) ) ).to.equal( subject.DEFAULTS.height );
+                    expect( $( 'svg.d3-stock-plot .point' ).length ).to.equal( fixtures.data.length );
+                    expect( $( 'svg.d3-stock-plot .range' ).length ).to.equal( fixtures.data.length );
+                    //fs.writeFileSync( path.resolve( './.tmp/' + Date.now() + '.html' ), html.header + $( 'body' ).html() + html.footer );
                 } );
             } );
         } );
