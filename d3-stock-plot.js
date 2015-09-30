@@ -11,10 +11,9 @@ var DEFAULTS = {
         left: 30,
         bottom: 30
     },
-    width: 960,
-    height: 500,
     el: false,
-    data: false
+    data: false,
+    ratio: 0.5
 };
 
 function convertToNumber( value ){
@@ -24,13 +23,6 @@ function convertToNumber( value ){
 function Renderer( opts ){
     chainable( this, _.defaults( opts || {}, DEFAULTS ) );
 }
-
-Renderer.prototype._calculateGraphDimensions = function _calculateGraphDimensions(){
-    return {
-        width: this.width() - this.margin().left() - this.margin().right(),
-        height: this.height() - this.margin().top() - this.margin().bottom()
-    }
-};
 
 Renderer.prototype.render = function render( opts ){
     if( opts ){
@@ -45,12 +37,16 @@ Renderer.prototype.render = function render( opts ){
         throw new Error( '"data" required.' );
     }
 
-    var gd = this._calculateGraphDimensions();
+    var el = d3.select( this.el() );
+    var width = parseInt(el.style('width'));
+    var height= this.ratio()*width;
+    var gw= width- this.margin().left() - this.margin().right();
+    var gh= height - this.margin().top() - this.margin().bottom();
     this._graph = {
-        width: gd.width,
-        height: gd.height,
-        x: d3.scale.linear().range( [ 0, gd.width ] ),
-        y: d3.scale.linear().range( [ gd.height, 0 ] ),
+        width: gw,
+        height: gh,
+        x: d3.scale.linear().range( [ 0, gw ] ),
+        y: d3.scale.linear().range( [ gh, 0 ] ),
         color: d3.scale.category10()
     };
 
@@ -61,11 +57,11 @@ Renderer.prototype.render = function render( opts ){
     var yAxis = d3.svg.axis()
         .scale( this._graph.y )
         .orient( "left" );
-    this._graph.content = d3.select( this.el() )
+    this._graph.content = el
         .append( "svg" )
         .attr( 'class', 'd3-stock-plot' )
-        .attr( "width", this.width() )
-        .attr( "height", this.height() )
+        .attr( "width", width )
+        .attr( "height", height )
         .append( "g" )
         .attr( "transform", "translate(" + this.margin().left() + "," + this.margin().top() + ")" );
 
