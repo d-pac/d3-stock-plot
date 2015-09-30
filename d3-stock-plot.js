@@ -31,41 +31,35 @@ Renderer.prototype._calculateGraphDimensions = function _calculateGraphDimension
 };
 
 Renderer.prototype.render = function render( opts ){
-    if(opts){
+    if( opts ){
         Object.keys( opts ).forEach( function( key ){
             this[ key ]( opts[ key ] );
         }, this );
     }
-    var el = this.el();
-    if( !el ){
+    if( !this.el() ){
         throw new Error( '"el" required.' );
     }
-
-    var data = this.data();
-    if( !data ){
+    if( !this.data() ){
         throw new Error( '"data" required.' );
     }
 
-    var graph = this._calculateGraphDimensions();
+    var gd = this._calculateGraphDimensions();
+    this._graph = {
+        width: gd.width,
+        height: gd.height,
+        x: d3.scale.linear().range( [ 0, gd.width ] ),
+        y: d3.scale.linear().range( [ gd.height, 0 ] ),
+        color: d3.scale.category10()
+    };
 
-    var n = _.size( data );
-    var x = d3.scale.linear().range( [ 0, graph.width ] );
-    var y = d3.scale.linear().range( [ graph.height, 0 ] );
-    var color = d3.scale.category10();
+    var n = _.size( this.data() );
     var xAxis = d3.svg.axis()
-        .scale( x )
+        .scale( this._graph.x )
         .orient( "bottom" );
     var yAxis = d3.svg.axis()
-        .scale( y )
+        .scale( this._graph.y )
         .orient( "left" );
-    var returnX = function( d ){
-        return x( d.x );
-    };
-    var returnColor = function( d ){
-        return color( d.state );
-    };
-
-    var svg = d3.select( this.el() )
+    this._graph.content = d3.select( this.el() )
         .append( "svg" )
         .attr( 'class', 'd3-stock-plot' )
         .attr( "width", this.width() )
@@ -73,18 +67,36 @@ Renderer.prototype.render = function render( opts ){
         .append( "g" )
         .attr( "transform", "translate(" + this.margin().left() + "," + this.margin().top() + ")" );
 
-    x.domain( [ 0, n ] );
+    this._graph.x.domain( [ 0, n ] );
 
-    svg.append( "g" )
+    this._graph.content.append( "g" )
         .attr( "class", "x axis" )
-        .attr( "transform", "translate(0," + graph.height + ")" )
+        .attr( "transform", "translate(0," + this._graph.height + ")" )
         .call( xAxis );
 
-    svg.append( "g" )
+    this._graph.content.append( "g" )
         .attr( "class", "y axis" )
         .call( yAxis );
 
-    var values = svg.selectAll( "values" )
+    this.update();
+};
+
+Renderer.prototype.update = function update( data ){
+    var _this = this;
+
+    function returnX( d ){
+        return _this._graph.x( d.x );
+    }
+
+    function returnColor( d ){
+        return _this._graph.color( d.state );
+    }
+
+    data = (data)
+        ? this.data( data )
+        : this.data();
+
+    var values = this._graph.content.selectAll( "values" )
         .data( data ).enter();
 
     values
@@ -93,10 +105,10 @@ Renderer.prototype.render = function render( opts ){
         .attr( "x1", returnX )
         .attr( "x2", returnX )
         .attr( "y1", function( d ){
-            return y( d.c0 );
+            return _this._graph.y( d.c0 );
         } )
         .attr( "y2", function( d ){
-            return y( d.c1 );
+            return _this._graph.y( d.c1 );
         } )
         .style( "stroke-width", 1 )
         .style( "stroke", returnColor )
@@ -108,7 +120,7 @@ Renderer.prototype.render = function render( opts ){
         .attr( "r", 3.5 )
         .attr( "cx", returnX )
         .attr( "cy", function( d ){
-            return y( d.y );
+            return _this._graph.y( d.y );
         } )
         .style( "fill", returnColor );
 };

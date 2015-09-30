@@ -73,11 +73,11 @@ describe( 'D3 stock plot component', function(){
                         data: fixtures.data
                     } );
                     var $svg = $( 'svg.d3-stock-plot' );
+                    fs.writeFileSync( path.resolve( './.tmp/' + Date.now() + '.html' ), html.header + $( 'body' ).html() + html.footer );
                     expect( Number( $svg.attr( 'width' ) ) ).to.equal( subject.DEFAULTS.width );
                     expect( Number( $svg.attr( 'height' ) ) ).to.equal( subject.DEFAULTS.height );
                     expect( $( 'svg.d3-stock-plot .point' ).length ).to.equal( fixtures.data.length );
                     expect( $( 'svg.d3-stock-plot .range' ).length ).to.equal( fixtures.data.length );
-                    //fs.writeFileSync( path.resolve( './.tmp/' + Date.now() + '.html' ), html.header + $( 'body' ).html() + html.footer );
                 } );
             } );
         } );
