@@ -5,14 +5,13 @@ var jsdom = require( 'jsdom' );
 var fs = require( 'fs' );
 var path = require( 'path' );
 
-require( 'babel/polyfill' );
-var subject = require( '../dist/d3-stock-plot' );
+var subject = require( '../d3-stock-plot' );
 var fixtures = require( './fixtures' );
 var jquery = fs.readFileSync( "./node_modules/jquery/dist/jquery.js", "utf-8" );
 var html = {
     header: '<html><head><title></title></head><body>',
     footer: '</body></html>'
-}
+};
 
 describe( 'D3 stock plot component', function(){
     var document, $;
