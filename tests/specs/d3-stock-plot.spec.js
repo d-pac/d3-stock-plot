@@ -23,6 +23,8 @@ var data = _.map(fixtures.data, function(d){
    } 
 });
 
+var API = [ 'render', 'margin', 'ratio', 'el', 'data', 'update' ];
+
 describe( 'D3 stock plot component', function(){
     var document, $;
     before( function( done ){
@@ -49,7 +51,7 @@ describe( 'D3 stock plot component', function(){
         } );
         it( 'should expose a DEFAULTS object', function(){
             expect( subject.DEFAULTS ).to.be.an.object();
-            [ 'margin', 'width', 'height' ].forEach( function( propName ){
+            [ 'margin', 'ratio' ].forEach( function( propName ){
                 expect( subject.DEFAULTS ).to.have.property( propName );
             } );
         } );
@@ -61,7 +63,7 @@ describe( 'D3 stock plot component', function(){
             } );
             it( 'should create a renderer', function(){
                 expect( renderer ).to.be.an.object();
-                [ 'render', 'margin', 'width', 'height', 'el', 'data' ].forEach( function( propName ){
+                API.forEach( function( propName ){
                     expect( renderer[ propName ] ).to.be.a.function();
                 } );
             } );
@@ -85,8 +87,6 @@ describe( 'D3 stock plot component', function(){
                     } );
                     var $svg = $( 'svg.d3-stock-plot' );
                     fs.writeFileSync( path.resolve( './.tmp/' + Date.now() + '.html' ), html.header + $( 'body' ).html() + html.footer );
-                    expect( Number( $svg.attr( 'width' ) ) ).to.equal( subject.DEFAULTS.width );
-                    expect( Number( $svg.attr( 'height' ) ) ).to.equal( subject.DEFAULTS.height );
                     expect( $( 'svg.d3-stock-plot .point' ).length ).to.equal( data.length );
                     expect( $( 'svg.d3-stock-plot .range' ).length ).to.equal( data.length );
                 } );

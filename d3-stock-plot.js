@@ -13,7 +13,9 @@ var DEFAULTS = {
     },
     el: false,
     data: false,
-    ratio: 0.5
+    ratio: 0.5,
+    hitmargin: 4,
+    debug: false
 };
 
 function convertToNumber( value ){
@@ -21,15 +23,14 @@ function convertToNumber( value ){
 }
 
 function Renderer( opts ){
-    chainable( this, _.defaults( opts || {}, DEFAULTS ) );
+    this.values( opts );
 }
 
+chainable( Renderer.prototype, DEFAULTS );
+
 Renderer.prototype.render = function render( opts ){
-    if( opts ){
-        Object.keys( opts ).forEach( function( key ){
-            this[ key ]( opts[ key ] );
-        }, this );
-    }
+    this.values( opts );
+    
     if( !this.el() ){
         throw new Error( '"el" required.' );
     }
@@ -38,10 +39,10 @@ Renderer.prototype.render = function render( opts ){
     }
 
     var el = d3.select( this.el() );
-    var width = parseInt(el.style('width'));
-    var height= this.ratio()*width;
-    var gw= width- this.margin().left() - this.margin().right();
-    var gh= height - this.margin().top() - this.margin().bottom();
+    var width = parseInt( el.style( 'width' ) );
+    var height = this.ratio() * width;
+    var gw = width - this.margin().left() - this.margin().right();
+    var gh = height - this.margin().top() - this.margin().bottom();
     this._graph = {
         width: gw,
         height: gh,
@@ -104,14 +105,16 @@ Renderer.prototype.update = function update( data ){
         .on( 'mouseover', function( d ){
             d3.select( '#v' + d.id + " .point" )
                 .transition().duration( 250 ).ease( 'cubic-out' ).delay( 0 )
-                .attr( 'r', 7 );
+                .attr( 'r', 10 );
         } )
         .on( 'mouseout', function( d ){
             d3.select( '#v' + d.id + " .point" )
                 .transition().duration( 500 ).ease( 'cubic-in-out' ).delay( 0 )
                 .attr( 'r', 3.5 );
-        } );
+        } )
+        ;
 
+    //lines
     values
         .append( "line" )
         .attr( 'class', 'range' )
@@ -125,8 +128,10 @@ Renderer.prototype.update = function update( data ){
         } )
         .style( "stroke-width", 1 )
         .style( "stroke", returnColor )
-        .style( "fill", "none" );
+        .style( "fill", "none" )
+    ;
 
+    //circles
     values
         .append( "circle" )
         .attr( "class", "point" )
@@ -135,7 +140,27 @@ Renderer.prototype.update = function update( data ){
         .attr( "cy", function( d ){
             return _this._graph.y( d.y[ 1 ] );
         } )
-        .style( "fill", returnColor );
+        .style( "fill", returnColor )
+    ;
+
+    //hit boxes
+    values.append( 'rect' )
+        .each( function(){
+            var bounds = this.parentNode.getBBox();
+            d3.select( this )
+                .attr( {
+                    'class': 'hitbox',
+                    x: bounds.x - _this.hitmargin(),
+                    y: bounds.y - _this.hitmargin(),
+                    width: bounds.width + (_this.hitmargin() * 2),
+                    height: bounds.height + (_this.hitmargin() * 2)
+                } )
+                .style( 'fill', 'rgba(0,0,0,' + (_this.debug()
+                        ? '0.3'
+                        : '0' )
+                    + ')' )
+            ;
+        } );
 };
 
 module.exports = function D3StockPlot( opts ){

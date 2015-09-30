@@ -18,5 +18,6 @@ var el = $('#preview')[0];
 var graph = stockplot();
 graph.render({
     el: el,
-    data: data
+    data: data,
+    debug: true
 });
