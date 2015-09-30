@@ -1,13 +1,15 @@
+'use strict';
+
 var d3 = require( 'd3' );
 var _ = require( 'lodash' );
 var chainable = require( 'chainable-object' );
 
 var DEFAULTS = {
     margin: {
-        top: 20,
-        right: 20,
-        left: 20,
-        bottom: 20
+        top: 30,
+        right: 30,
+        left: 30,
+        bottom: 30
     },
     width: 960,
     height: 500,
@@ -97,7 +99,22 @@ Renderer.prototype.update = function update( data ){
         : this.data();
 
     var values = this._graph.content.selectAll( "values" )
-        .data( data ).enter();
+        .data( data ).enter()
+        .append( "g" )
+        .attr( 'class', 'stock-value' )
+        .attr( 'id', function( d ){
+            return "v" + d.id;
+        } )
+        .on( 'mouseover', function( d ){
+            d3.select( '#v' + d.id + " .point" )
+                .transition().duration( 250 ).ease( 'cubic-out' ).delay( 0 )
+                .attr( 'r', 7 );
+        } )
+        .on( 'mouseout', function( d ){
+            d3.select( '#v' + d.id + " .point" )
+                .transition().duration( 500 ).ease( 'cubic-in-out' ).delay( 0 )
+                .attr( 'r', 3.5 );
+        } );
 
     values
         .append( "line" )
@@ -105,10 +122,10 @@ Renderer.prototype.update = function update( data ){
         .attr( "x1", returnX )
         .attr( "x2", returnX )
         .attr( "y1", function( d ){
-            return _this._graph.y( d.c0 );
+            return _this._graph.y( d.y[ 0 ] );
         } )
         .attr( "y2", function( d ){
-            return _this._graph.y( d.c1 );
+            return _this._graph.y( d.y[ 2 ] );
         } )
         .style( "stroke-width", 1 )
         .style( "stroke", returnColor )
@@ -120,7 +137,7 @@ Renderer.prototype.update = function update( data ){
         .attr( "r", 3.5 )
         .attr( "cx", returnX )
         .attr( "cy", function( d ){
-            return _this._graph.y( d.y );
+            return _this._graph.y( d.y[ 1 ] );
         } )
         .style( "fill", returnColor );
 };

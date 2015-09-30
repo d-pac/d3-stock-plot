@@ -1,17 +1,27 @@
 'use strict';
 
+var _ = require('lodash');
 var expect = require( 'must' );
 var jsdom = require( 'jsdom' );
 var fs = require( 'fs' );
 var path = require( 'path' );
 
-var subject = require( '../d3-stock-plot' );
-var fixtures = require( './fixtures' );
+var subject = require( '../../d3-stock-plot' );
+var fixtures = require( '../fixtures' );
 var jquery = fs.readFileSync( "./node_modules/jquery/dist/jquery.js", "utf-8" );
 var html = {
     header: '<html><head><title></title></head><body>',
     footer: '</body></html>'
 };
+
+var data = _.map(fixtures.data, function(d){
+   return {
+       x: d.x,
+       y: [ d.c0, d.y, d.c1 ],
+       selected: false,
+       id: d.x
+   } 
+});
 
 describe( 'D3 stock plot component', function(){
     var document, $;
@@ -47,6 +57,7 @@ describe( 'D3 stock plot component', function(){
             var renderer;
             beforeEach( function(){
                 renderer = subject();
+                $( 'body' ).html('');
             } );
             it( 'should create a renderer', function(){
                 expect( renderer ).to.be.an.object();
@@ -70,14 +81,29 @@ describe( 'D3 stock plot component', function(){
                 it( 'should render the graph correctly', function(){
                     renderer.render( {
                         el: document.body,
-                        data: fixtures.data
+                        data: data
                     } );
                     var $svg = $( 'svg.d3-stock-plot' );
                     fs.writeFileSync( path.resolve( './.tmp/' + Date.now() + '.html' ), html.header + $( 'body' ).html() + html.footer );
                     expect( Number( $svg.attr( 'width' ) ) ).to.equal( subject.DEFAULTS.width );
                     expect( Number( $svg.attr( 'height' ) ) ).to.equal( subject.DEFAULTS.height );
-                    expect( $( 'svg.d3-stock-plot .point' ).length ).to.equal( fixtures.data.length );
-                    expect( $( 'svg.d3-stock-plot .range' ).length ).to.equal( fixtures.data.length );
+                    expect( $( 'svg.d3-stock-plot .point' ).length ).to.equal( data.length );
+                    expect( $( 'svg.d3-stock-plot .range' ).length ).to.equal( data.length );
+                } );
+            } );
+            describe( '.update()', function(){
+                it( 'should render the graph correctly', function(){
+                    renderer.render( {
+                        el: document.body,
+                        data: data
+                    } );
+                    renderer.update(data);
+                    //var $svg = $( 'svg.d3-stock-plot' );
+                    fs.writeFileSync( path.resolve( './.tmp/' + Date.now() + '.html' ), html.header + $( 'body' ).html() + html.footer );
+                    //expect( Number( $svg.attr( 'width' ) ) ).to.equal( subject.DEFAULTS.width );
+                    //expect( Number( $svg.attr( 'height' ) ) ).to.equal( subject.DEFAULTS.height );
+                    //expect( $( 'svg.d3-stock-plot .point' ).length ).to.equal( data.length );
+                    //expect( $( 'svg.d3-stock-plot .range' ).length ).to.equal( data.length );
                 } );
             } );
         } );
