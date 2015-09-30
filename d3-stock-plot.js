@@ -31,8 +31,10 @@ Renderer.prototype._calculateGraphDimensions = function _calculateGraphDimension
 };
 
 Renderer.prototype.render = function render( opts ){
-    for( var key in opts ){
-        this[ key ]( opts[ key ] );
+    if(opts){
+        Object.keys( opts ).forEach( function( key ){
+            this[ key ]( opts[ key ] );
+        }, this );
     }
     var el = this.el();
     if( !el ){
